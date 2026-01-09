@@ -160,9 +160,46 @@
             fetch('/api/status')
                 .then(response => response.json())
                 .then(data => {
-                    // Update display with new data
-                    console.log('Status updated:', data);
-                    // In production, update DOM elements here
+                    // Update current camera display
+                    const cameraDisplay = document.querySelector('.camera-display');
+                    if (cameraDisplay && data.decision_state && data.decision_state.current_camera) {
+                        cameraDisplay.textContent = 'Current Camera: ' + data.decision_state.current_camera.toUpperCase();
+                    }
+                    
+                    // Update microphone activity
+                    if (data.audio_state && data.audio_state.last_analysis) {
+                        const analysis = data.audio_state.last_analysis;
+                        const activeMics = analysis.active_microphones || [];
+                        const volumes = analysis.channel_volumes || {};
+                        
+                        // Update each microphone display
+                        document.querySelectorAll('.microphone').forEach((micEl, index) => {
+                            const volumeEl = micEl.querySelector('.mic-volume');
+                            const isActive = activeMics.includes(index);
+                            
+                            // Update volume display
+                            if (volumeEl && volumes[index] !== undefined) {
+                                volumeEl.textContent = Math.round(volumes[index]);
+                            }
+                            
+                            // Update active state styling
+                            if (isActive) {
+                                micEl.classList.add('active');
+                            } else {
+                                micEl.classList.remove('active');
+                            }
+                        });
+                    }
+                    
+                    // Update last decision reason
+                    if (data.decision_state && data.decision_state.last_decision && data.decision_state.last_decision.reason) {
+                        const reasonElements = document.querySelectorAll('.status-item .value');
+                        reasonElements.forEach(el => {
+                            if (el.parentElement.querySelector('label')?.textContent === 'Last Decision') {
+                                el.textContent = data.decision_state.last_decision.reason;
+                            }
+                        });
+                    }
                 })
                 .catch(error => console.error('Error fetching status:', error));
         }, 2000);
