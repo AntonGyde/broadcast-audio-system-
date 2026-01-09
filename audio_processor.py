@@ -85,7 +85,8 @@ class AudioProcessor:
         channel_volumes = {}
         for ch in range(self.channels):
             channel_data = audio_array[:, ch]
-            rms = np.sqrt(np.mean(channel_data**2))
+            # Using optimized numpy norm calculation
+            rms = np.linalg.norm(channel_data) / np.sqrt(len(channel_data))
             channel_volumes[ch] = float(rms)
         
         return channel_volumes

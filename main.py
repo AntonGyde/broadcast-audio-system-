@@ -72,9 +72,11 @@ class BroadcastAudioSystem:
                     analysis = self.audio_processor.analyze_audio()
                 else:
                     # Simulation mode - no real audio
+                    # Use configured number of channels
+                    num_channels = self.audio_processor.channels if self.audio_processor else 4
                     analysis = {
                         'timestamp': time.time(),
-                        'channel_volumes': {i: 0 for i in range(4)},
+                        'channel_volumes': {i: 0 for i in range(num_channels)},
                         'active_microphones': []
                     }
                 

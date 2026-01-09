@@ -41,7 +41,7 @@ def save_config(config):
     """Save configuration to JSON file"""
     with config_lock:
         with open(CONFIG_PATH, 'w') as f:
-            json.dump(config, indent=2, fp=f)
+            json.dump(config, f, indent=2)
 
 
 @app.route('/')
