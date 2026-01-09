@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadcast Audio System - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .status-item {
+            background: #f7f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-item label {
+            display: block;
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-item .value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .camera-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .microphone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .microphone {
+            background: #f7f9fc;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .microphone.active {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .microphone .mic-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .microphone .mic-volume {
+            font-size: 1.5em;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-text {
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        // Auto-refresh status every 2 seconds
+        setInterval(function() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update display with new data
+                    console.log('Status updated:', data);
+                    // In production, update DOM elements here
+                })
+                .catch(error => console.error('Error fetching status:', error));
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Broadcast Audio System</h1>
+        
+        <div class="nav-buttons">
+            <a href="/" class="btn">Dashboard</a>
+            <a href="/settings" class="btn">Settings</a>
+        </div>
+        
+        {% if audio_state.error %}
+        <div class="error">
+            <strong>Error:</strong> {{ audio_state.error }}
+        </div>
+        {% endif %}
+        
+        <div class="camera-display">
+            Current Camera: {{ decision_state.current_camera|upper }}
+        </div>
+        
+        <div class="card">
+            <h2>Audio Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>System Status</label>
+                    <div class="value">{{ 'RUNNING' if audio_state.initialized else 'STOPPED' }}</div>
+                </div>
+                <div class="status-item">
+                    <label>Sample Rate</label>
+                    <div class="value">{{ config.audio.sample_rate }} Hz</div>
+                </div>
+                <div class="status-item">
+                    <label>Channels</label>
+                    <div class="value">{{ config.audio.channels }}</div>
+                </div>
+                <div class="status-item">
+                    <label>Volume Threshold</label>
+                    <div class="value">{{ config.thresholds.volume_threshold }}</div>
+                </div>
+            </div>
+            
+            {% if audio_state.device_info %}
+            <div class="info-text">
+                Device: {{ audio_state.device_info.name or 'Unknown' }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <h2>Microphone Activity</h2>
+            <div class="microphone-grid">
+                {% for i in range(config.audio.channels) %}
+                <div class="microphone {% if audio_state.last_analysis.active_microphones and i in audio_state.last_analysis.active_microphones %}active{% endif %}">
+                    <div class="mic-label">Microphone {{ i + 1 }}</div>
+                    <div class="mic-volume">
+                        {% if audio_state.last_analysis.channel_volumes %}
+                            {{ audio_state.last_analysis.channel_volumes.get(i|string, 0)|round(0)|int }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.8em; margin-top: 5px;">
+                        → {{ config.cameras.camera_mappings.get(i|string, 'N/A') }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Decision Logic</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>Default Camera</label>
+                    <div class="value">{{ config.cameras.default_camera }}</div>
+                </div>
+                <div class="status-item">
+                    <label>Priority Mode</label>
+                    <div class="value">{{ config.decision.priority_mode }}</div>
+                </div>
+                <div class="status-item">
+                    <label>Idle Timeout</label>
+                    <div class="value">{{ config.decision.idle_timeout_seconds }}s</div>
+                </div>
+                {% if decision_state.last_decision.reason %}
+                <div class="status-item" style="grid-column: 1 / -1;">
+                    <label>Last Decision</label>
+                    <div class="value" style="font-size: 0.9em;">{{ decision_state.last_decision.reason }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

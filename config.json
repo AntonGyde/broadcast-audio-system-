@@ -1,0 +1,26 @@
+{
+  "audio": {
+    "sample_rate": 44100,
+    "chunk_size": 1024,
+    "channels": 4,
+    "format": "paInt16",
+    "device_index": null
+  },
+  "thresholds": {
+    "volume_threshold": 500,
+    "min_active_frames": 3
+  },
+  "cameras": {
+    "default_camera": "wide_shot",
+    "camera_mappings": {
+      "0": "camera_1",
+      "1": "camera_2",
+      "2": "camera_3",
+      "3": "camera_4"
+    }
+  },
+  "decision": {
+    "priority_mode": "first_active",
+    "idle_timeout_seconds": 2
+  }
+}
