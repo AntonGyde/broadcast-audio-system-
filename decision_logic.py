@@ -4,7 +4,7 @@ Handles camera switching decisions based on active microphones
 """
 import json
 import time
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 class DecisionLogic:

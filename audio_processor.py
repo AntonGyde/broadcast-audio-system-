@@ -2,7 +2,13 @@
 Audio Processor Module
 Handles USB audio device capture and real-time audio analysis
 """
-import pyaudio
+try:
+    import pyaudio
+    PYAUDIO_AVAILABLE = True
+except ImportError:
+    PYAUDIO_AVAILABLE = False
+    print("Warning: PyAudio not available. Audio capture will not work.")
+
 import numpy as np
 import json
 import time
@@ -33,6 +39,10 @@ class AudioProcessor:
         
     def initialize_audio(self) -> bool:
         """Initialize PyAudio and open audio stream"""
+        if not PYAUDIO_AVAILABLE:
+            print("PyAudio not available - cannot initialize audio")
+            return False
+        
         try:
             self.pyaudio_instance = pyaudio.PyAudio()
             
